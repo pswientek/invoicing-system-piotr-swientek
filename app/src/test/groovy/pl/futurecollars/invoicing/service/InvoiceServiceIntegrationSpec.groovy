@@ -6,7 +6,7 @@ import pl.futurecollars.invoicing.model.Invoice
 import spock.lang.Specification
 import static pl.futurecollars.invoicing.TestHelpers.invoice
 
-class InvoiceServiceIntegrationTest extends Specification {
+class InvoiceServiceIntegrationSpec extends Specification {
 
     private InvoiceService service
     private List<Invoice> invoices

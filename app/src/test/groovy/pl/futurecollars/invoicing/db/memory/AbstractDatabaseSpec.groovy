@@ -5,16 +5,12 @@ import pl.futurecollars.invoicing.model.Invoice
 import spock.lang.Specification
 import static pl.futurecollars.invoicing.TestHelpers.invoice
 
-class InMemoryDatabaseTest extends Specification {
+abstract class AbstractDatabaseSpec extends Specification {
 
-    private Database database
-    private List<Invoice> invoices
+    List<Invoice> invoices = (1..12).collect { invoice(it) }
+    Database database = getDatabaseInstance()
 
-    def setup() {
-        database = new InMemoryDatabase()
-
-        invoices = (1..12).collect { invoice(it) }
-    }
+    abstract Database getDatabaseInstance()
 
     def "should save invoices returning sequential id, invoice should have id set to correct value, get by id returns saved invoice"() {
         when:
@@ -54,6 +50,17 @@ class InMemoryDatabaseTest extends Specification {
         database.getAll().forEach({ assert it.getId() != 1 })
     }
 
+    def "it's possible to update the invoice"() {
+        given:
+        int id = database.save(invoices.get(0))
+
+        when:
+        database.update(id, invoices.get(1))
+
+        then:
+        database.getById(id).get() == invoices.get(1)
+    }
+
     def "can delete all invoices"() {
         given:
         invoices.forEach({ database.save(it) })
@@ -70,25 +77,13 @@ class InMemoryDatabaseTest extends Specification {
         database.delete(123)
     }
 
-    def "it's possible to update the invoice"() {
-        given:
-        int id = database.save(invoices.get(0))
-
-        when:
-        database.update(id, invoices.get(1))
-
-        then:
-        database.getById(id).get() == invoices.get(1)
-    }
-
     def "updating not existing invoice throws exception"() {
         when:
         database.update(213, invoices.get(1))
 
         then:
-        def ex = thrown(IllegalArgumentException)
-        ex.message == "Id 213 does not exist"
+        def e = thrown(IllegalArgumentException)
+        e.message == "Id 213 does not exist"
     }
-
 
 }

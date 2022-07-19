@@ -4,7 +4,7 @@ import pl.futurecollars.invoicing.db.Database
 import spock.lang.Specification
 import static pl.futurecollars.invoicing.TestHelpers.invoice
 
-class InvoiceServiceUnitTest extends Specification {
+class InvoiceServiceUnitSpec extends Specification {
 
     private InvoiceService service
     private Database database
