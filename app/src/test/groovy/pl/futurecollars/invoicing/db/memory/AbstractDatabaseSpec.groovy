@@ -83,7 +83,7 @@ abstract class AbstractDatabaseSpec extends Specification {
 
         then:
         def e = thrown(IllegalArgumentException)
-        e.message == "Id 213 does not exist"
+        e.message == "Database error: id 213 does not exist"
     }
 
 }

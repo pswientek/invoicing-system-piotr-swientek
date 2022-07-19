@@ -88,8 +88,8 @@ class InvoiceServiceIntegrationSpec extends Specification {
         service.update(213, invoices.get(1))
 
         then:
-        def ex = thrown(IllegalArgumentException)
-        ex.message == "Id 213 does not exist"
+        def e = thrown(IllegalArgumentException)
+        e.message == "Database error: id 213 does not exist"
     }
 
 }
