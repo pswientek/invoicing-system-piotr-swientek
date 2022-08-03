@@ -6,10 +6,9 @@ import java.nio.file.Path
 
 class IdServiceSpec extends Specification {
 
-    public String path = "./ids.txt"
-
     def "next id starts from 1 if file was empty"() {
         given:
+        String path = "./ids.txt"
         FileService fileService = new FileService(path)
         IdService idService = new IdService(fileService)
 
@@ -31,9 +30,10 @@ class IdServiceSpec extends Specification {
 
     def "next id starts from last number if file was not empty"() {
         given:
+        String path = "./ids.txt"
         FileService fileService = new FileService(path)
-        IdService idService = new IdService(fileService)
         Files.writeString(Path.of(path), "17")
+        IdService idService = new IdService(fileService)
 
         expect:
         ['17'] == Files.readAllLines(Path.of(path))

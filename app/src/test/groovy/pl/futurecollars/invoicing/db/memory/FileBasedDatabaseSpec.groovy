@@ -11,23 +11,19 @@ import java.nio.file.Path
 
 class FileBasedDatabaseSpec extends AbstractDatabaseSpec{
 
-    def dbPath
-
     @Override
     Database getDatabaseInstance() {
 
         String idFilePath = "./ids.txt"
         String dbPath = "./dbFile.txt"
-        def idFileService = new FileService(idFilePath)
-        def idService = new IdService(idFileService)
-        def dbFileService = new FileService(dbPath)
-        return new FileBasedDatabase(idService, dbFileService, new JsonService())
+        def idService = new IdService(new FileService(idFilePath))
+        return new FileBasedDatabase(idService, new FileService(dbPath), new FileService(idFilePath), new JsonService())
     }
 
     def "file based database writes invoices to correct file"() {
         given:
+        String dbPath = "./dbFile.txt"
         def db = getDatabaseInstance()
-        //String dbPath = "./dbFile.txt"
 
         when:
         db.save(TestHelpers.invoice(4))

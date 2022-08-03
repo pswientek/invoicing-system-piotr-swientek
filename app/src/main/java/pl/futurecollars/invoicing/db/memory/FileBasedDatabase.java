@@ -18,12 +18,13 @@ public class FileBasedDatabase implements Database {
 
     private IdService idService;
     private FileService fileService;
+    private FileService idFileService;
     private JsonService jsonService;
 
     @Override
     public int save(Invoice invoice) {
         try {
-            invoice.setId(idService.getNextIdAndIncrement(fileService));
+            invoice.setId(idService.getNextIdAndIncrement(idFileService));
             fileService.appendLineToFile(jsonService.invoiceAsJson(invoice));
 
             return invoice.getId();
