@@ -3,8 +3,10 @@ package pl.futurecollars.invoicing.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import lombok.NoArgsConstructor;
 import pl.futurecollars.invoicing.model.Invoice;
 
+@NoArgsConstructor
 public class JsonService {
 
     private final ObjectMapper objectMapper;

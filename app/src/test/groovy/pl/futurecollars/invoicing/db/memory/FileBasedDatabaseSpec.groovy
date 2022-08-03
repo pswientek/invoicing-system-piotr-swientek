@@ -7,6 +7,7 @@ import pl.futurecollars.invoicing.service.IdService
 import pl.futurecollars.invoicing.service.JsonService
 
 import java.nio.file.Files
+import java.nio.file.Path
 
 class FileBasedDatabaseSpec extends AbstractDatabaseSpec{
 
@@ -14,31 +15,30 @@ class FileBasedDatabaseSpec extends AbstractDatabaseSpec{
 
     @Override
     Database getDatabaseInstance() {
-        def fileService = new FileService()
 
-        def idFile =  File.createTempFile("ids", ".txt")
-        def idPath = idFile.toPath()
-        def idService = new IdService(idPath, fileService)
-
-        def dbFile = File.createTempFile("dbData", ".txt")
-        dbPath = dbFile.toPath()
-        return new FileBasedDatabase(dbPath, idService, fileService, new JsonService())
+        String idFilePath = "./ids.txt"
+        String dbPath = "./dbFile.txt"
+        def idFileService = new FileService(idFilePath)
+        def idService = new IdService(idFileService)
+        def dbFileService = new FileService(dbPath)
+        return new FileBasedDatabase(idService, dbFileService, new JsonService())
     }
 
     def "file based database writes invoices to correct file"() {
         given:
         def db = getDatabaseInstance()
+        //String dbPath = "./dbFile.txt"
 
         when:
         db.save(TestHelpers.invoice(4))
 
         then:
-        1 == Files.readAllLines(dbPath).size()
+        1 == Files.readAllLines(Path.of(dbPath)).size()
 
         when:
         db.save(TestHelpers.invoice(5))
 
         then:
-        2 == Files.readAllLines(dbPath).size()
+        2 == Files.readAllLines(Path.of(dbPath)).size()
     }
 }

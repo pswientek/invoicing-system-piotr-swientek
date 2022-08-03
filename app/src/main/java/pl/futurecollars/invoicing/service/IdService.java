@@ -1,24 +1,22 @@
 package pl.futurecollars.invoicing.service;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 public class IdService {
-
-    private final Path idFilePath;
-    private final FileService fileService;
 
     private int nextId = 1;
 
-    public IdService(Path idFilePath, FileService fileService) {
-        this.idFilePath = idFilePath;
-        this.fileService = fileService;
+    public IdService(FileService fileService) throws IOException {
 
         try {
-            List<String> lines = fileService.readAllLines(idFilePath);
+            List<String> lines = fileService.readAllLines();
             if (lines.isEmpty()) {
-                fileService.writeToFile(idFilePath, "1");
+                fileService.writeToFile("1");
             } else {
                 nextId = Integer.parseInt(lines.get(0));
             }
@@ -28,9 +26,9 @@ public class IdService {
 
     }
 
-    public int getNextIdAndIncrement() {
+    public int getNextIdAndIncrement(FileService fileService) {
         try {
-            fileService.writeToFile(idFilePath, String.valueOf(nextId + 1));
+            fileService.writeToFile(String.valueOf(nextId + 1));
             return nextId++;
         } catch (IOException e) {
             throw new RuntimeException("Service error: failed to read id file", e);

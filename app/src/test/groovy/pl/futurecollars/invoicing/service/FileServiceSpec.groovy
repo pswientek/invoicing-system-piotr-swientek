@@ -7,44 +7,44 @@ import java.nio.file.Path
 
 class FileServiceSpec extends Specification{
 
-    private FileService fileService = new FileService()
-    private Path path = File.createTempFile('lines', '.txt').toPath()
+    private String path = "./fileServiceDb.txt"
+    private FileService fileService = new FileService(path)
 
     def "line is correctly appended to file"() {
         setup:
         def testLine = "Test line to write"
 
         expect:
-        [] == Files.readAllLines(path)
+        [] == Files.readAllLines(Path.of(path))
 
         when:
-        fileService.appendLineToFile(path, testLine)
+        fileService.appendLineToFile(testLine)
 
         then:
-        [testLine] == Files.readAllLines(path)
+        [testLine] == Files.readAllLines(Path.of(path))
 
         when:
-        fileService.appendLineToFile(path, testLine)
+        fileService.appendLineToFile(testLine)
 
         then:
-        [testLine, testLine] == Files.readAllLines(path)
+        [testLine, testLine] == Files.readAllLines(Path.of(path))
     }
 
     def "line is correctly written to file"() {
         expect:
-        [] == Files.readAllLines(path)
+        [] == Files.readAllLines(Path.of(path))
 
         when:
-        fileService.writeToFile(path, "1")
+        fileService.writeToFile("1")
 
         then:
-        ["1"] == Files.readAllLines(path)
+        ["1"] == Files.readAllLines(Path.of(path))
 
         when:
-        fileService.writeToFile(path, "2")
+        fileService.writeToFile("2")
 
         then:
-        ["2"] == Files.readAllLines(path)
+        ["2"] == Files.readAllLines(Path.of(path))
     }
 
     def "list of lines is correctly written to file"() {
@@ -53,33 +53,33 @@ class FileServiceSpec extends Specification{
         def letters = ['a', 'b', 'c']
 
         expect:
-        [] == Files.readAllLines(path)
+        [] == Files.readAllLines(Path.of(path))
 
 
         when:
-        fileService.updateFile(path, digits)
+        fileService.updateFile(digits)
 
         then:
-        digits == Files.readAllLines(path)
+        digits == Files.readAllLines(Path.of(path))
 
         when:
-        fileService.updateFile(path, letters)
+        fileService.updateFile(letters)
 
         then:
-        letters == Files.readAllLines(path)
+        letters == Files.readAllLines(Path.of(path))
     }
 
     def "line is correctly read from file"() {
         setup:
         def lines = List.of("line 1", "line 2", "line 3")
-        Files.write(path, lines)
+        Files.write(Path.of(path), lines)
 
         expect:
-        lines == fileService.readAllLines(path)
+        lines == fileService.readAllLines()
     }
 
     def "empty file returns empty collection"() {
         expect:
-        [] == fileService.readAllLines(path)
+        [] == fileService.readAllLines()
     }
 }

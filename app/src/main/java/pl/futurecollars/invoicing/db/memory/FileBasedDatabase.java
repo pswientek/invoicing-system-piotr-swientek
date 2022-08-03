@@ -1,7 +1,6 @@
 package pl.futurecollars.invoicing.db.memory;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,7 +16,6 @@ import pl.futurecollars.invoicing.service.JsonService;
 @NoArgsConstructor
 public class FileBasedDatabase implements Database {
 
-    private Path databasePath;
     private IdService idService;
     private FileService fileService;
     private JsonService jsonService;
@@ -25,8 +23,8 @@ public class FileBasedDatabase implements Database {
     @Override
     public int save(Invoice invoice) {
         try {
-            invoice.setId(idService.getNextIdAndIncrement());
-            fileService.appendLineToFile(databasePath, jsonService.invoiceAsJson(invoice));
+            invoice.setId(idService.getNextIdAndIncrement(fileService));
+            fileService.appendLineToFile(jsonService.invoiceAsJson(invoice));
 
             return invoice.getId();
         } catch (IOException e) {
@@ -37,7 +35,7 @@ public class FileBasedDatabase implements Database {
     @Override
     public Optional<Invoice> getById(int id) {
         try {
-            return fileService.readAllLines(databasePath)
+            return fileService.readAllLines()
                     .stream()
                     .filter(line -> containsId(line, id))
                     .map(line -> jsonService.returnJsonAsInvoice(line, Invoice.class))
@@ -50,7 +48,7 @@ public class FileBasedDatabase implements Database {
     @Override
     public List<Invoice> getAll() {
         try {
-            return fileService.readAllLines(databasePath)
+            return fileService.readAllLines()
                     .stream()
                     .map(line -> jsonService.returnJsonAsInvoice(line, Invoice.class))
                     .collect(Collectors.toList());
@@ -62,7 +60,7 @@ public class FileBasedDatabase implements Database {
     @Override
     public void update(int id, Invoice updatedInvoice) {
         try {
-            List<String> allInvoices = fileService.readAllLines(databasePath);
+            List<String> allInvoices = fileService.readAllLines();
             var listWithoutInvoiceWithGivenId = allInvoices
                     .stream()
                     .filter(line -> !containsId(line, id))
@@ -75,7 +73,7 @@ public class FileBasedDatabase implements Database {
             updatedInvoice.setId(id);
             listWithoutInvoiceWithGivenId.add(jsonService.invoiceAsJson(updatedInvoice));
 
-            fileService.updateFile(databasePath, listWithoutInvoiceWithGivenId);
+            fileService.updateFile(listWithoutInvoiceWithGivenId);
 
         } catch (IOException e) {
             throw new RuntimeException("Database error: failed to update invoice with id: " + id, e);
@@ -85,12 +83,12 @@ public class FileBasedDatabase implements Database {
     @Override
     public void delete(int id) {
         try {
-            var updatedList = fileService.readAllLines(databasePath)
+            var updatedList = fileService.readAllLines()
                     .stream()
                     .filter(line -> !containsId(line, id))
                     .collect(Collectors.toList());
 
-            fileService.updateFile(databasePath, updatedList);
+            fileService.updateFile(updatedList);
 
         } catch (IOException e) {
             throw new RuntimeException("Database error: failed to delete invoice with id: " + id, e);
