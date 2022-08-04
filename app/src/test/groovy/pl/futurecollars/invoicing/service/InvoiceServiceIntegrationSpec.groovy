@@ -6,7 +6,7 @@ import pl.futurecollars.invoicing.model.Invoice
 import spock.lang.Specification
 import static pl.futurecollars.invoicing.TestHelpers.invoice
 
-class InvoiceServiceIntegrationTest extends Specification {
+class InvoiceServiceIntegrationSpec extends Specification {
 
     private InvoiceService service
     private List<Invoice> invoices
@@ -88,8 +88,8 @@ class InvoiceServiceIntegrationTest extends Specification {
         service.update(213, invoices.get(1))
 
         then:
-        def ex = thrown(IllegalArgumentException)
-        ex.message == "Id 213 does not exist"
+        def e = thrown(IllegalArgumentException)
+        e.message == "Database error: id 213 does not exist"
     }
 
 }
