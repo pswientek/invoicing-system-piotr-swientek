@@ -69,7 +69,7 @@ class InvoiceServiceIntegrationSpec extends Specification {
 
     def "deleting not existing invoice is not causing any error"() {
         expect:
-        service.delete(123)
+        service.delete(123) == Optional.empty()
     }
 
     def "it's possible to update the invoice"() {
@@ -84,12 +84,8 @@ class InvoiceServiceIntegrationSpec extends Specification {
     }
 
     def "updating not existing invoice throws exception"() {
-        when:
-        service.update(213, invoices.get(1))
-
-        then:
-        def e = thrown(IllegalArgumentException)
-        e.message == "Database error: id 213 does not exist"
+        expect:
+        service.update(213, invoices.get(1)) == Optional.empty()
     }
 
 }

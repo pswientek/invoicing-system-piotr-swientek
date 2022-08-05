@@ -59,7 +59,7 @@ public class FileBasedDatabase implements Database {
     }
 
     @Override
-    public void update(int id, Invoice updatedInvoice) {
+    public Optional<Invoice> update(int id, Invoice updatedInvoice) {
         try {
             List<String> allInvoices = fileService.readAllLines();
             var listWithoutInvoiceWithGivenId = allInvoices
@@ -67,29 +67,39 @@ public class FileBasedDatabase implements Database {
                     .filter(line -> !containsId(line, id))
                     .collect(Collectors.toList());
 
-            if (allInvoices.size() == listWithoutInvoiceWithGivenId.size()) {
-                throw new IllegalArgumentException("Database error: id " + id + " does not exist");
-            }
-
             updatedInvoice.setId(id);
             listWithoutInvoiceWithGivenId.add(jsonService.invoiceAsJson(updatedInvoice));
 
             fileService.updateFile(listWithoutInvoiceWithGivenId);
 
+            allInvoices.removeAll(listWithoutInvoiceWithGivenId);
+            if (allInvoices.isEmpty()) {
+                return Optional.empty();
+            }
+            return Optional.of(jsonService.returnJsonAsInvoice(allInvoices.get(0), Invoice.class));
         } catch (IOException e) {
             throw new RuntimeException("Database error: failed to update invoice with id: " + id, e);
         }
     }
 
     @Override
-    public void delete(int id) {
+    public Optional<Invoice> delete(int id) {
         try {
-            var updatedList = fileService.readAllLines()
+            var allInvoices = fileService.readAllLines();
+
+            var updatedList = allInvoices
                     .stream()
                     .filter(line -> !containsId(line, id))
                     .collect(Collectors.toList());
 
             fileService.updateFile(updatedList);
+
+            allInvoices.removeAll(updatedList);
+
+            if (allInvoices.isEmpty()) {
+                return Optional.empty();
+            }
+            return Optional.of(jsonService.returnJsonAsInvoice(allInvoices.get(0), Invoice.class));
 
         } catch (IOException e) {
             throw new RuntimeException("Database error: failed to delete invoice with id: " + id, e);

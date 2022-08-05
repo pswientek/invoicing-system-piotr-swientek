@@ -19,6 +19,20 @@ plugins {
     id 'checkstyle'
 
     id 'jacoco'
+
+    id 'org.springframework.boot' version '2.7.2'
+
+    id 'io.spring.dependency-management' version '1.0.12.RELEASE'
+}
+
+group = 'pl.futurecollars'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
@@ -31,6 +45,9 @@ dependencies {
 
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     // Use the latest Groovy version for Spock testing
     testImplementation 'org.codehaus.groovy:groovy:3.0.9'
@@ -96,5 +113,10 @@ jacocoTestCoverageVerification {
                 minimum = 0.8
             }
         }
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: 'pl/futurecollars/invoicing/controller/**')
+        }))
     }
 }
