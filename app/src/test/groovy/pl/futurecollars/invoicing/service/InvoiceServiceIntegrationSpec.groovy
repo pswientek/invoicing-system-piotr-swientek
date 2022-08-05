@@ -24,14 +24,9 @@ class InvoiceServiceIntegrationSpec extends Specification {
 
         then:
         ids == (1..invoices.size()).collect()
-        ids.forEach({ assert service.getById(it).isPresent() })
-        ids.forEach({ assert service.getById(it).get().getId() == it })
-        ids.forEach({ assert service.getById(it).get() == invoices.get(it - 1) })
-    }
-
-    def "get by id returns empty optional when there is no invoice with given id"() {
-        expect:
-        !service.getById(1).isPresent()
+        ids.forEach({ assert service.getById(it).hasBody() })
+        ids.forEach({ assert service.getById(it).getBody().getId() == it })
+        ids.forEach({ assert service.getById(it).getBody() == invoices.get(it - 1) })
     }
 
     def "get all returns empty collection if there were no invoices"() {
@@ -48,7 +43,7 @@ class InvoiceServiceIntegrationSpec extends Specification {
         service.getAll().forEach({ assert it == invoices.get(it.getId() - 1) })
 
         when:
-        service.delete(1)
+        service.deleteById(1)
 
         then:
         service.getAll().size() == invoices.size() - 1
@@ -61,15 +56,10 @@ class InvoiceServiceIntegrationSpec extends Specification {
         invoices.forEach({ service.save(it) })
 
         when:
-        invoices.forEach({ service.delete(it.getId()) })
+        invoices.forEach({ service.deleteById(it.getId()) })
 
         then:
         service.getAll().isEmpty()
-    }
-
-    def "deleting not existing invoice is not causing any error"() {
-        expect:
-        service.delete(123) == Optional.empty()
     }
 
     def "it's possible to update the invoice"() {
@@ -80,12 +70,7 @@ class InvoiceServiceIntegrationSpec extends Specification {
         service.update(id, invoices.get(1))
 
         then:
-        service.getById(id).get() == invoices.get(1)
-    }
-
-    def "updating not existing invoice throws exception"() {
-        expect:
-        service.update(213, invoices.get(1)) == Optional.empty()
+        service.getById(id).getBody() == invoices.get(1)
     }
 
 }
