@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Service
 public class IdService {
 
     private int nextId = 1;

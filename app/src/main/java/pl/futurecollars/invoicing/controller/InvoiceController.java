@@ -12,43 +12,43 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.futurecollars.invoicing.model.Invoice;
-import pl.futurecollars.invoicing.service.InvoiceService;
+import pl.futurecollars.invoicing.service.InvoiceControllerService;
 
 @RestController
 @RequestMapping("invoices")
 public class InvoiceController {
 
     @Autowired
-    private final InvoiceService invoiceService;
+    private final InvoiceControllerService invoiceControllerService;
 
     @Autowired
-    public InvoiceController(InvoiceService invoiceService) {
-        this.invoiceService = invoiceService;
+    public InvoiceController(InvoiceControllerService invoiceControllerService) {
+        this.invoiceControllerService = invoiceControllerService;
     }
 
     @PostMapping
     public int add(@RequestBody Invoice invoice) {
-        return invoiceService.save(invoice);
+        return invoiceControllerService.save(invoice);
     }
 
-    @GetMapping
+    @GetMapping(produces = { "application/json;charset=UTF-8" })
     public List<Invoice> getAll() {
-        return invoiceService.getAll();
+        return invoiceControllerService.getAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Invoice> getById(@PathVariable int id) {
-        return invoiceService.getById(id);
+        return invoiceControllerService.getById(id);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable int id, @RequestBody Invoice invoice) {
-        return invoiceService.update(id, invoice);
+        return invoiceControllerService.update(id, invoice);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable int id) {
-        return invoiceService.deleteById(id);
+        return invoiceControllerService.deleteById(id);
     }
 
 }
