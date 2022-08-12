@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Service;
 import pl.futurecollars.invoicing.model.Invoice;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Service
 public class JsonService {
 
     private ObjectMapper objectMapper;

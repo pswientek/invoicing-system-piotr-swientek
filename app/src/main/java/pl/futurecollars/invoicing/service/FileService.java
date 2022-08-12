@@ -5,7 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
+@Service
 public class FileService {
 
     private final String filePathName;
