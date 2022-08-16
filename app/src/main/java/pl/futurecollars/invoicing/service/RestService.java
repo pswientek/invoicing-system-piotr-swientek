@@ -8,7 +8,7 @@ import pl.futurecollars.invoicing.db.Database;
 import pl.futurecollars.invoicing.model.Invoice;
 
 @Service
-public class InvoiceControllerService {
+public class RestService {
 
     private Database database;
 

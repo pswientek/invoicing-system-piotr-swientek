@@ -6,7 +6,7 @@ import pl.futurecollars.invoicing.service.InvoiceService
 import spock.lang.Specification
 
 @SpringBootTest
-class InvoiceSystemApplicationSpec extends Specification {
+class InvoicingSystemApplicationSpec extends Specification {
 
     @Autowired
     private InvoiceService invoiceService
