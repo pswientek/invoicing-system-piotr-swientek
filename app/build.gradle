@@ -6,28 +6,27 @@
  * User Manual available at https://docs.gradle.org/7.4.2/userguide/building_java_projects.html
  */
 
+buildscript {
+    ext{
+        lombokVersion = '1.18.20'
+        spockVersion = '2.1-groovy-3.0'
+        springBootVersion = '2.7.2'
+        springDependencyManagmentVersion = '1.0.12.RELEASE'
+    }
+}
+
+
 plugins {
-    // Apply the java plugin to add support for Java
     id 'java'
-
-    // Apply the groovy plugin to also add support for Groovy (needed for Spock)
     id 'groovy'
-
-    // Apply the application plugin to add support for building a CLI application in Java.
-    id 'application'
-
     id 'checkstyle'
-
     id 'jacoco'
-
-    id 'org.springframework.boot' version '2.7.2'
-
-    id 'io.spring.dependency-management' version '1.0.12.RELEASE'
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagmentVersion}"
 }
 
 group = 'pl.futurecollars'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
 
 configurations {
     compileOnly {
@@ -36,69 +35,35 @@ configurations {
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenCentral()
 }
 
 dependencies {
-    implementation 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3'
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-    // Use the latest Groovy version for Spock testing
-    testImplementation 'org.codehaus.groovy:groovy:3.0.9'
-
-    // Use the awesome Spock testing and specification framework even with Java
-    testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
-    testImplementation 'org.spockframework:spock-spring:2.1-groovy-3.0'
-    testImplementation 'junit:junit:4.13.2'
-
-    // This dependency is used by the application.
-    implementation 'com.google.guava:guava:30.1.1-jre'
-
-    compileOnly 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
-
-    testCompileOnly 'org.projectlombok:lombok:1.18.24'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
-
-}
-
-application {
-    // Define the main class for the application.
-    mainClass = 'pl.futurecollars.invoicing.App'
-}
+    testImplementation "org.spockframework:spock-core:${spockVersion}"
+    testImplementation "org.spockframework:spock-spring:${spockVersion}"
+ }
 
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
-checkstyle {
-    showViolations = true
-    ignoreFailures = false
-    maxWarnings = 0
-    maxErrors = 0
-}
-test {
-    finalizedBy jacocoTestReport // report is always generated after tests run
-    finalizedBy jacocoTestCoverageVerification
-}
-jacocoTestReport {
-    dependsOn test // tests are required to run before generating the report
-    reports {
-        xml.required = false
-        csv.required = false
-        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
-    }
-}
+
 jacoco {
     toolVersion = "0.8.7"
     reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
 }
+
 jacocoTestCoverageVerification {
     violationRules {
         rule {
@@ -121,3 +86,35 @@ jacocoTestCoverageVerification {
         }))
     }
 }
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.ADOPTOPENJDK
+    }
+}
+
+test {
+    finalizedBy jacocoTestReport
+}
+
+check {
+    finalizedBy jacocoTestCoverageVerification
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+}
+
+checkstyle {
+    showViolations = true
+    ignoreFailures = false
+    maxWarnings = 0
+    maxErrors = 0
+}
+
