@@ -4,6 +4,7 @@ import pl.futurecollars.invoicing.db.Database
 import pl.futurecollars.invoicing.db.memory.InMemoryDatabase
 import pl.futurecollars.invoicing.model.Invoice
 import spock.lang.Specification
+
 import static pl.futurecollars.invoicing.TestHelpers.invoice
 
 class InvoiceServiceIntegrationSpec extends Specification {
@@ -24,9 +25,14 @@ class InvoiceServiceIntegrationSpec extends Specification {
 
         then:
         ids == (1..invoices.size()).collect()
-        ids.forEach({ assert service.getById(it).hasBody() })
-        ids.forEach({ assert service.getById(it).getBody().getId() == it })
-        ids.forEach({ assert service.getById(it).getBody() == invoices.get(it - 1) })
+        ids.forEach({ assert service.getById(it).isPresent() })
+        ids.forEach({ assert service.getById(it).get().getId() == it })
+        ids.forEach({ assert service.getById(it).get() == invoices.get(it - 1) })
+    }
+
+    def "get by id returns empty optional when there is no invoice with given id"() {
+        expect:
+        !service.getById(1).isPresent()
     }
 
     def "get all returns empty collection if there were no invoices"() {
@@ -43,7 +49,7 @@ class InvoiceServiceIntegrationSpec extends Specification {
         service.getAll().forEach({ assert it == invoices.get(it.getId() - 1) })
 
         when:
-        service.deleteById(1)
+        service.delete(1)
 
         then:
         service.getAll().size() == invoices.size() - 1
@@ -56,21 +62,33 @@ class InvoiceServiceIntegrationSpec extends Specification {
         invoices.forEach({ service.save(it) })
 
         when:
-        invoices.forEach({ service.deleteById(it.getId()) })
+        invoices.forEach({ service.delete(it.getId()) })
 
         then:
         service.getAll().isEmpty()
     }
 
-    def "it's possible to update the invoice"() {
+    def "deleting not existing invoice returns Optional.empty()"() {
+        expect:
+        service.delete(123) == Optional.empty()
+    }
+
+    def "it's possible to update the invoice, previous invoice is returned"() {
         given:
-        int id = service.save(invoices.get(0))
+        def originalInvoice = invoices.get(0)
+        int id = service.save(originalInvoice)
 
         when:
-        service.update(id, invoices.get(1))
+        def result = service.update(id, invoices.get(1))
 
         then:
-        service.getById(id).getBody() == invoices.get(1)
+        service.getById(id).get() == invoices.get(1)
+        result == Optional.of(originalInvoice)
+    }
+
+    def "updating not existing invoice returns Optional.empty()"() {
+        expect:
+        service.update(213, invoices.get(1)) == Optional.empty()
     }
 
 }

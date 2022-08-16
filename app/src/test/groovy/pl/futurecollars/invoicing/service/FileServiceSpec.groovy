@@ -10,6 +10,11 @@ class FileServiceSpec extends Specification{
     private String path = "./fileServiceDb.txt"
     private FileService fileService = new FileService(path)
 
+    def "creating file after fileService initialization"() {
+        expect:
+        Files.exists(Path.of(path))
+    }
+
     def "line is correctly appended to file"() {
         setup:
         def testLine = "Test line to write"

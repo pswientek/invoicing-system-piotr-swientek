@@ -22,6 +22,11 @@ public class DatabaseConfiguration {
         return new IdService(fileService);
     }
 
+    @Bean
+    public FileService fileService() throws IOException {
+        return new FileService(INVOICES_FILE_NAME);
+    }
+
     @SneakyThrows
     @Bean
     public Database fileBasedDatabase() {
