@@ -10,16 +10,29 @@ import java.time.LocalDate
 class TestHelpers {
 
     static company(int id) {
-        new Company(("$id").repeat(10),
-                "ul. Chabrowa 10b/$id 44-100 Rybnik, Polska",
-                "SMA corp $id Sp. z o.o")
+        Company.builder()
+                .taxIdentificationNumber("$id")
+                .address("ul. Chabrowa 10b/$id 44-100 Rybnik, Polska")
+                .name("SMA corp $id SA")
+                .build()
     }
 
     static product(int id) {
-        new InvoiceEntry("Antenna matching $id", 1, BigDecimal.valueOf(id * 1000), BigDecimal.valueOf(id * 1000 * 0.08), Vat.VAT_8)
+        InvoiceEntry.builder()
+                    .description("Antenna matching")
+                    .quantity(1)
+                    .price(BigDecimal.valueOf(id * 1000))
+                    .vatValue(BigDecimal.valueOf(id * 1000 * 0.08))
+                    .vatRate(Vat.VAT_8)
+                    .build()
     }
 
     static invoice(int id) {
-        new Invoice(LocalDate.now(), company(id), company(id), List.of(product(id)))
+        Invoice.builder()
+                .date(LocalDate.now())
+                .buyer(company(id + 10))
+                .seller(company(id))
+                .entries((1..id).collect({ product(it) }))
+                .build()
     }
 }
