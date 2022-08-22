@@ -70,34 +70,34 @@ class TaxCalculatorControllerSpec extends Specification{
         def taxCalculatorResponse = calculateTax("5")
 
         then:
-        taxCalculatorResponse.income == 15000
+        taxCalculatorResponse.income == 30000
         taxCalculatorResponse.costs == 0
-        taxCalculatorResponse.earnings == 15000
-        taxCalculatorResponse.incomingVat == 1200.0
+        taxCalculatorResponse.earnings == 30000
+        taxCalculatorResponse.incomingVat == 2400.0
         taxCalculatorResponse.outgoingVat == 0
-        taxCalculatorResponse.vatToReturn == 1200.0
+        taxCalculatorResponse.vatToReturn == 2400.0
 
         when:
         taxCalculatorResponse = calculateTax("10")
 
         then:
-        taxCalculatorResponse.income == 55000
+        taxCalculatorResponse.income == 110000
         taxCalculatorResponse.costs == 0
-        taxCalculatorResponse.earnings == 55000
-        taxCalculatorResponse.incomingVat == 4400.0
+        taxCalculatorResponse.earnings == 110000
+        taxCalculatorResponse.incomingVat == 8800.0
         taxCalculatorResponse.outgoingVat == 0
-        taxCalculatorResponse.vatToReturn == 4400.0
+        taxCalculatorResponse.vatToReturn == 8800.0
 
         when:
         taxCalculatorResponse = calculateTax("15")
 
         then:
         taxCalculatorResponse.income == 0
-        taxCalculatorResponse.costs == 15000
-        taxCalculatorResponse.earnings == -15000
+        taxCalculatorResponse.costs == 30000
+        taxCalculatorResponse.earnings == -30000
         taxCalculatorResponse.incomingVat == 0
-        taxCalculatorResponse.outgoingVat == 1200.0
-        taxCalculatorResponse.vatToReturn == -1200.0
+        taxCalculatorResponse.outgoingVat == 2400.0
+        taxCalculatorResponse.vatToReturn == -2400.0
     }
 
     def "correct values are returned when company was buyer and seller"() {
@@ -108,12 +108,12 @@ class TaxCalculatorControllerSpec extends Specification{
         def taxCalculatorResponse = calculateTax("12")
 
         then:
-        taxCalculatorResponse.income == 78000
-        taxCalculatorResponse.costs == 3000
-        taxCalculatorResponse.earnings == 75000
-        taxCalculatorResponse.incomingVat == 6240.0
-        taxCalculatorResponse.outgoingVat == 240.0
-        taxCalculatorResponse.vatToReturn == 6000.0
+        taxCalculatorResponse.income == 156000
+        taxCalculatorResponse.costs == 6000
+        taxCalculatorResponse.earnings == 150000
+        taxCalculatorResponse.incomingVat == 12480.0
+        taxCalculatorResponse.outgoingVat == 480.0
+        taxCalculatorResponse.vatToReturn == 12000.0
     }
 
     TaxCalculatorResult calculateTax(String taxIdentificationNumber) {

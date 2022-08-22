@@ -21,8 +21,8 @@ class TestHelpers {
         InvoiceEntry.builder()
                     .description("Antenna matching")
                     .quantity(1)
-                    .price(BigDecimal.valueOf(id * 1000))
-                    .vatValue(BigDecimal.valueOf(id * 1000 * 0.08))
+                    .price(BigDecimal.valueOf(id * 2000))
+                    .vatValue(BigDecimal.valueOf(id * 2000 * 0.08))
                     .vatRate(Vat.VAT_8)
                     .build()
     }
