@@ -37,12 +37,9 @@ class InvoiceControllerSpec extends Specification {
     @Shared
     private int invoiceId
 
-    def setup() {
-        getAllInvoices().each { invoice -> deleteInvoice(invoice.id) }
-    }
-
     def "empty array is returned when no invoices were added"() {
         when:
+        getAllInvoices().each { invoice -> deleteInvoice(invoice.id) }
         def response = mockMvc.perform(get(ENDPOINT))
                 .andExpect(status().isOk())
                 .andReturn()
