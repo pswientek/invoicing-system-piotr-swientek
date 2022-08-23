@@ -23,7 +23,7 @@ public class FileBasedDatabase implements Database {
     public int save(Invoice invoice) {
         try {
             invoice.setId(idService.getNextIdAndIncrement(idFileService));
-            fileService.appendLineToFile(jsonService.invoiceAsJson(invoice));
+            fileService.appendLineToFile(jsonService.objectAsJson(invoice));
 
             return invoice.getId();
         } catch (IOException e) {
@@ -66,7 +66,7 @@ public class FileBasedDatabase implements Database {
                     .collect(Collectors.toList());
 
             updatedInvoice.setId(id);
-            listWithoutInvoiceWithGivenId.add(jsonService.invoiceAsJson(updatedInvoice));
+            listWithoutInvoiceWithGivenId.add(jsonService.objectAsJson(updatedInvoice));
 
             fileService.updateFile(listWithoutInvoiceWithGivenId);
 

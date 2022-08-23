@@ -22,6 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Stepwise
 class InvoiceControllerSpec extends Specification {
 
+    static final String ENDPOINT = "/invoices"
+
     @Autowired
     private MockMvc mockMvc
 
@@ -37,7 +39,8 @@ class InvoiceControllerSpec extends Specification {
 
     def "empty array is returned when no invoices were added"() {
         when:
-        def response = mockMvc.perform(get("/invoices"))
+        getAllInvoices().each { invoice -> deleteInvoice(invoice.id) }
+        def response = mockMvc.perform(get(ENDPOINT))
                 .andExpect(status().isOk())
                 .andReturn()
                 .response
@@ -50,12 +53,12 @@ class InvoiceControllerSpec extends Specification {
 
     def "add single invoice"() {
         given:
-        def invoiceAsJson = jsonService.invoiceAsJson(originalInvoice)
+        def invoiceAsJson = jsonService.objectAsJson(originalInvoice)
 
         when:
         invoiceId = Integer.valueOf(
                 mockMvc.perform(
-                        post("/invoices")
+                        post(ENDPOINT)
                                 .content(invoiceAsJson)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -75,7 +78,7 @@ class InvoiceControllerSpec extends Specification {
         expectedInvoice.id = invoiceId
 
         when:
-        def response = mockMvc.perform(get("/invoices"))
+        def response = mockMvc.perform(get(ENDPOINT))
                 .andExpect(status().isOk())
                 .andReturn()
                 .response
@@ -94,7 +97,7 @@ class InvoiceControllerSpec extends Specification {
         expectedInvoice.id = invoiceId
 
         when:
-        def response = mockMvc.perform(get("/invoices/$invoiceId"))
+        def response = mockMvc.perform(get("$ENDPOINT/$invoiceId"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .response
@@ -111,11 +114,11 @@ class InvoiceControllerSpec extends Specification {
         def modifiedInvoice = originalInvoice
         modifiedInvoice.date = updatedDate
 
-        def invoiceAsJson = jsonService.invoiceAsJson(modifiedInvoice)
+        def invoiceAsJson = jsonService.objectAsJson(modifiedInvoice)
 
         expect:
         mockMvc.perform(
-                put("/invoices/$invoiceId")
+                put("$ENDPOINT/$invoiceId")
                         .content(invoiceAsJson)
                         .contentType(MediaType.APPLICATION_JSON)
         )
@@ -129,7 +132,7 @@ class InvoiceControllerSpec extends Specification {
         expectedInvoice.date = updatedDate
 
         when:
-        def response = mockMvc.perform(get("/invoices/$invoiceId"))
+        def response = mockMvc.perform(get("$ENDPOINT/$invoiceId"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .response
@@ -143,15 +146,30 @@ class InvoiceControllerSpec extends Specification {
 
     def "invoice can be deleted"() {
         expect:
-        mockMvc.perform(delete("/invoices/$invoiceId"))
+        mockMvc.perform(delete("$ENDPOINT/$invoiceId"))
                 .andExpect(status().isNoContent())
 
         and:
-        mockMvc.perform(delete("/invoices/$invoiceId"))
+        mockMvc.perform(delete("$ENDPOINT/$invoiceId"))
                 .andExpect(status().isNotFound())
 
         and:
-        mockMvc.perform(get("/invoices/$invoiceId"))
+        mockMvc.perform(get("$ENDPOINT/$invoiceId"))
                 .andExpect(status().isNotFound())
+    }
+
+    List<Invoice> getAllInvoices() {
+        def response = mockMvc.perform(get(ENDPOINT))
+                .andExpect(status().isOk())
+                .andReturn()
+                .response
+                .contentAsString
+
+        jsonService.returnJsonAsInvoice(response, Invoice[])
+    }
+
+    void deleteInvoice(int id) {
+        mockMvc.perform(delete("$ENDPOINT/$id"))
+                .andExpect(status().isNoContent())
     }
 }
