@@ -14,6 +14,8 @@ class TestHelpers {
                 .taxIdentificationNumber("$id")
                 .address("ul. Chabrowa 10b/$id 44-100 Rybnik, Polska")
                 .name("SMA corp $id SA")
+                .pensionInsurance(BigDecimal.TEN * BigDecimal.valueOf(id))
+                .healthInsurance(BigDecimal.valueOf(100) * BigDecimal.valueOf(id))
                 .build()
     }
 
