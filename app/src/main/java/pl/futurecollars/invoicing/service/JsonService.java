@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.futurecollars.invoicing.model.Invoice;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,9 +20,9 @@ public class JsonService {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
-    public String invoiceAsJson(Invoice invoice) {
+    public String objectAsJson(Object object) {
         try {
-            return objectMapper.writeValueAsString(invoice);
+            return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Service error: failed to convert string to JSON", e);
         }
