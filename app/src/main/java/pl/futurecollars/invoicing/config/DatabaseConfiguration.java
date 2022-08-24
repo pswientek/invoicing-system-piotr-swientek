@@ -17,34 +17,36 @@ import pl.futurecollars.invoicing.service.JsonService;
 @Configuration
 public class DatabaseConfiguration {
 
-    @Value("${invoicing-system.database.id.file}")
-    public String idFile;
-    @Value("${invoicing-system.database.invoices.file}")
-    public String invoicesFile;
-
     @Bean
-    public IdService idService() throws IOException {
+    @ConditionalOnProperty(name = "invoicing-system.database", havingValue = "file")
+    public IdService idService(
+        @Value("${invoicing-system.database.id.file}") String idFile
+    ) throws IOException {
         FileService fileService = new FileService(idFile);
         return new IdService(fileService);
     }
 
     @Bean
-    public FileService fileService() throws IOException {
+    @ConditionalOnProperty(name = "invoicing-system.database", havingValue = "file")
+    public FileService fileService(
+        @Value("${invoicing-system.database.invoices.file}") String invoicesFile
+    ) throws IOException {
         return new FileService(invoicesFile);
     }
 
-    @ConditionalOnProperty(name = "invoicing-system.database", havingValue = "file")
     @Bean
-    public Database fileBasedDatabase() throws IOException {
-        log.debug("File based database was created");
+    @ConditionalOnProperty(name = "invoicing-system.database", havingValue = "file")
+    public Database fileBasedDatabase(
+        @Value("${invoicing-system.database.invoices.file}") String invoicesFile,
+        @Value("${invoicing-system.database.id.file}") String idFile
+    ) throws IOException {
         IdService idService = new IdService(new FileService(idFile));
         return new FileBasedDatabase(idService, new FileService(invoicesFile), new FileService(idFile), new JsonService());
     }
 
-    @ConditionalOnProperty(name = "invoicing-system.database", havingValue = "memory")
     @Bean
+    @ConditionalOnProperty(name = "invoicing-system.database", havingValue = "memory")
     public Database inMemoryDatabase() {
-        log.debug("In memory database was created");
         return new InMemoryDatabase();
     }
 
