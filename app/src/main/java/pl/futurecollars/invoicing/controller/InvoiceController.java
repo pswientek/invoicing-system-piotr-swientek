@@ -16,7 +16,7 @@ public class InvoiceController implements InvoiceApi {
     private final RestService restService;
 
     @Override
-    public int add(@RequestBody Invoice invoice) {
+    public long add(@RequestBody Invoice invoice) {
         return restService.save(invoice);
     }
 

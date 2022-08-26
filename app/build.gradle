@@ -14,7 +14,9 @@ buildscript {
         springDependencyManagmentVersion = '1.0.12.RELEASE'
         springFoxUiVersion = '3.0.0'
         springFoxStarterVersion = '3.0.0'
-        flywayVersion = '9.1.6'
+        flywayVersion = '8.5.13'
+        postgresVersion = '42.4.2'
+        h2Version = '1.4.200'
     }
 }
 
@@ -26,6 +28,7 @@ plugins {
     id 'jacoco'
     id 'org.springframework.boot' version "${springBootVersion}"
     id 'io.spring.dependency-management' version "${springDependencyManagmentVersion}"
+    id 'org.flywaydb.flyway' version "${flywayVersion}"
 }
 
 group = 'pl.futurecollars'
@@ -44,19 +47,19 @@ repositories {
 dependencies {
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    compileOnly 'org.flywaydb:flyway-core:9.1.6'
-
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
 
     developmentOnly "org.springframework.boot:spring-boot-devtools"
 
     implementation "org.springframework.boot:spring-boot-starter-web"
     implementation "org.springframework.boot:spring-boot-starter-jdbc"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:"
     implementation "io.springfox:springfox-boot-starter:${springFoxStarterVersion}"
     implementation "io.springfox:springfox-swagger-ui:${springFoxUiVersion}"
+    implementation "org.flywaydb:flyway-core:${flywayVersion}"
 
-    runtimeOnly 'com.h2database:h2:1.4.200'
-    runtimeOnly 'org.postgresql:postgresql:42.4.2'
+    runtimeOnly "com.h2database:h2:${h2Version}"
+    runtimeOnly "org.postgresql:postgresql:${postgresVersion}"
 
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
@@ -136,9 +139,14 @@ task testWithMemoryDatabase(type: Test) {
 }
 
 task testWithSqlDatabase(type: Test) {
-    systemProperty 'spring.profiles.active', 'sql'
+    systemProperty 'spring.profiles.active', 'sql-pg'
+}
+
+task testWithJpaDatabase(type: Test) {
+    systemProperty 'spring.progiles.active', 'jpa'
 }
 
 check.dependsOn testWithFileDatabase
 check.dependsOn testWithMemoryDatabase
-//check.dependsOn testWithSqlDatabase
+check.dependsOn testWithSqlDatabase
+check.dependsOn testWithJpaDatabase
