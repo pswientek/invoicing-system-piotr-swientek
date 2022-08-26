@@ -1,7 +1,9 @@
-package pl.futurecollars.invoicing.db.memory
+package pl.futurecollars.invoicing.db.file
 
+import pl.futurecollars.invoicing.db.AbstractDatabaseSpec
 import pl.futurecollars.invoicing.db.Database
 import pl.futurecollars.invoicing.TestHelpers
+import pl.futurecollars.invoicing.db.file.FileBasedDatabase
 import pl.futurecollars.invoicing.service.FileService
 import pl.futurecollars.invoicing.service.IdService
 import pl.futurecollars.invoicing.service.JsonService

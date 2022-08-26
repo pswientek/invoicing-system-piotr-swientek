@@ -135,6 +135,7 @@ class TaxCalculatorControllerSpec extends Specification{
                                 .vatValue(BigDecimal.valueOf(23.45))
                                 .vatRate(Vat.VAT_8)
                                 .price(BigDecimal.valueOf(100))
+                                .quantity(1.0)
                                 .carExpenses(
                                         Car.builder()
                                                 .personalUsage(A)
@@ -197,6 +198,7 @@ class TaxCalculatorControllerSpec extends Specification{
                         InvoiceEntry.builder()
                                 .price(76011.62)
                                 .vatValue(0.0)
+                                .quantity(1.0)
                                 .vatRate(Vat.VAT_0)
                                 .build()
                 ))
@@ -211,6 +213,7 @@ class TaxCalculatorControllerSpec extends Specification{
                         InvoiceEntry.builder()
                                 .price(11329.47)
                                 .vatValue(0.0)
+                                .quantity(1.0)
                                 .vatRate(Vat.VAT_0)
                                 .build()
                 ))
@@ -256,7 +259,7 @@ class TaxCalculatorControllerSpec extends Specification{
         jsonService.returnJsonAsInvoice(response, TaxCalculatorResult)
     }
 
-    List<Invoice> addUniqueInvoices(int count) {
+    List<Invoice> addUniqueInvoices(long count) {
         (1..count).collect { id ->
             def invoice = invoice(id)
             invoice.id = addInvoiceAndReturnId(invoice)
@@ -264,7 +267,7 @@ class TaxCalculatorControllerSpec extends Specification{
         }
     }
 
-    int addInvoiceAndReturnId(Invoice invoice) {
+    long addInvoiceAndReturnId(Invoice invoice) {
         Integer.valueOf(
                 mockMvc.perform(
                         post(INVOICE_ENDPOINT)
@@ -288,7 +291,7 @@ class TaxCalculatorControllerSpec extends Specification{
         jsonService.returnJsonAsInvoice(response, Invoice[])
     }
 
-    void deleteInvoice(int id) {
+    void deleteInvoice(long id) {
         mockMvc.perform(delete("$INVOICE_ENDPOINT/$id"))
                 .andExpect(status().isNoContent())
     }

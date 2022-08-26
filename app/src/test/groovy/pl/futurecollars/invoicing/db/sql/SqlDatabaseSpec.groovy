@@ -1,10 +1,12 @@
-package pl.futurecollars.invoicing.db.memory
+package pl.futurecollars.invoicing.db.sql
 
 import org.flywaydb.core.Flyway
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
+import pl.futurecollars.invoicing.db.AbstractDatabaseSpec
 import pl.futurecollars.invoicing.db.Database
+import pl.futurecollars.invoicing.db.sql.SqlDatabase
 
 import javax.sql.DataSource
 
@@ -23,10 +25,7 @@ class SqlDatabaseSpec extends AbstractDatabaseSpec {
         flyway.clean()
         flyway.migrate()
 
-        def database = new SqlDatabase(jdbcTemplate)
-        database.initVatRatesMap() // need to call explicity because we do not creat it as spring bean
-
-        database
+        new SqlDatabase(jdbcTemplate)
     }
 }
 

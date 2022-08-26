@@ -1,4 +1,4 @@
-package pl.futurecollars.invoicing.db.memory
+package pl.futurecollars.invoicing.db
 
 import pl.futurecollars.invoicing.db.Database
 import pl.futurecollars.invoicing.model.Invoice
@@ -8,19 +8,29 @@ import static pl.futurecollars.invoicing.TestHelpers.invoice
 abstract class AbstractDatabaseSpec extends Specification {
 
     List<Invoice> invoices = (1..12).collect { invoice(it) }
-    Database database = getDatabaseInstance()
 
     abstract Database getDatabaseInstance()
+
+    Database database
+
+    def setup() {
+        database = getDatabaseInstance()
+        database.reset()
+    }
 
     def "should save invoices returning sequential id, invoice should have id set to correct value, get by id returns saved invoice"() {
         when:
         def ids = invoices.collect{ it.id = database.save(it) }
 
         then:
-        ids == (1..invoices.size()).collect()
+        ids == (1L..invoices.size()).collect()
         ids.forEach { assert database.getById(it).isPresent() }
         ids.forEach { assert database.getById(it).get().getId() == it }
-        ids.forEach { assert resetIds(database.getById(it).get()) == invoices.get(it - 1) }
+        ids.forEach {
+            def expectedInvoice = resetIds(invoices.get(it - 1 as int))
+            def invoiceFromDb = resetIds(database.getById(it).get())
+            assert invoiceFromDb.toString() == expectedInvoice.toString()
+        }
     }
 
     def "get by id returns empty optional when there is no invoice with given id"() {
@@ -39,14 +49,14 @@ abstract class AbstractDatabaseSpec extends Specification {
 
         expect:
         database.getAll().size() == invoices.size()
-        database.getAll().forEach { assert resetIds(it) == invoices.get(it.getId() - 1) }
+        database.getAll().forEach { assert resetIds(it) == invoices.get(it.getId() - 1 as int) }
 
         when:
         database.delete(1)
 
         then:
         database.getAll().size() == invoices.size() - 1
-        database.getAll().forEach { assert resetIds(it) == invoices.get(it.getId() - 1) }
+        database.getAll().forEach { assert resetIds(it) == invoices.get(it.getId() - 1 as int) }
         database.getAll().forEach { assert it.getId() != 1 }
     }
 
