@@ -14,8 +14,8 @@ class TestHelpers {
                 .taxIdentificationNumber("$id")
                 .address("ul. Chabrowa 10b/$id 44-100 Rybnik, Polska")
                 .name("SMA corp $id SA")
-                .pensionInsurance(BigDecimal.TEN * BigDecimal.valueOf(id))
-                .healthInsurance(BigDecimal.valueOf(100) * BigDecimal.valueOf(id))
+                .pensionInsurance((BigDecimal.TEN * BigDecimal.valueOf(id)).setScale(2))
+                .healthInsurance((BigDecimal.valueOf(100) * BigDecimal.valueOf(id)).setScale(2))
                 .build()
     }
 
@@ -23,8 +23,8 @@ class TestHelpers {
         InvoiceEntry.builder()
                     .description("Antenna matching")
                     .quantity(1)
-                    .price(BigDecimal.valueOf(id * 2000))
-                    .vatValue(BigDecimal.valueOf(id * 2000 * 0.08))
+                    .price((BigDecimal.valueOf(id * 2000)).setScale(2))
+                    .vatValue((BigDecimal.valueOf(id * 2000 * 0.08)).setScale(2))
                     .vatRate(Vat.VAT_8)
                     .build()
     }
@@ -32,6 +32,7 @@ class TestHelpers {
     static invoice(int id) {
         Invoice.builder()
                 .date(LocalDate.now())
+                .number("2022/0101/2564/$id")
                 .buyer(company(id + 10))
                 .seller(company(id))
                 .entries((1..id).collect({ product(it) }))
