@@ -52,6 +52,7 @@ class InvoiceServiceUnitSpec extends Specification {
     def "calling update() should delegate to database update() method"() {
         given:
         def invoice = invoice(1)
+        invoice.id = 1
         when:
         service.update(invoice.getId(), invoice)
         then:

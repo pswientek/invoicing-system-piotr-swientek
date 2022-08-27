@@ -17,11 +17,11 @@ public class RestService {
         this.database = database;
     }
 
-    public int save(Invoice invoice) {
+    public long save(Invoice invoice) {
         return database.save(invoice);
     }
 
-    public ResponseEntity<Invoice> getById(int id) {
+    public ResponseEntity<Invoice> getById(long id) {
         return database.getById(id)
                 .map(invoice -> ResponseEntity.ok().body(invoice))
                 .orElse(ResponseEntity.notFound().build());
@@ -31,13 +31,13 @@ public class RestService {
         return database.getAll();
     }
 
-    public ResponseEntity<?> update(int id, Invoice invoice) {
+    public ResponseEntity<?> update(long id, Invoice invoice) {
         return database.update(id, invoice)
                 .map(name -> ResponseEntity.noContent().build())
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    public ResponseEntity<?> deleteById(int id) {
+    public ResponseEntity<?> deleteById(long id) {
         return database.delete(id)
                 .map(name -> ResponseEntity.noContent().build())
                 .orElse(ResponseEntity.notFound().build());

@@ -19,7 +19,7 @@ public interface InvoiceApi {
 
     @ApiOperation(value = "Add new invoice to system")
     @PostMapping
-    int add(@RequestBody Invoice invoice);
+    long add(@RequestBody Invoice invoice);
 
     @ApiOperation(value = "Get list of all invoices")
     @GetMapping(produces = {"application/json;charset=UTF-8"})
