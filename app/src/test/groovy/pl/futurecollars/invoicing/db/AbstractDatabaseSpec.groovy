@@ -18,18 +18,33 @@ abstract class AbstractDatabaseSpec extends Specification {
         database.reset()
     }
 
-    def "should save invoices returning sequential id, invoice should have id set to correct value, get by id returns saved invoice"() {
+    def "should save invoices returning sequential id"() {
         when:
-        def ids = invoices.collect{ it.id = database.save(it) }
+        def ids = invoices.collect {it.id = database.save(it) }
 
         then:
-        ids == (1L..invoices.size()).collect()
-        ids.forEach { assert database.getById(it).isPresent() }
-        ids.forEach { assert database.getById(it).get().getId() == it }
+        (1..invoices.size() - 1).forEach {assert ids[it] == ids[0] + it }
+    }
+
+    def "invoice should have id set to correct value"() {
+        when:
+        def ids = invoices.collect {it.id = database.save(it) }
+
+        then:
+        ids.forEach {assert database.getById(it).isPresent() }
+        ids.forEach {assert database.getById(it).get().getId() == it }
+    }
+
+    def "get by id returns expected invoice"() {
+        when:
+        def ids = invoices.collect { it.id = database.save(it) }
+
+        then:
         ids.forEach {
-            def expectedInvoice = resetIds(invoices.get(it - 1 as int))
-            def invoiceFromDb = resetIds(database.getById(it).get())
-            assert invoiceFromDb.toString() == expectedInvoice.toString()
+            def expectedInvoice = resetIds(invoices.get((int) (it - ids[0]))).toString()
+            def invoiceFromDb = resetIds(database.getById(it).get()).toString()
+
+            assert invoiceFromDb == expectedInvoice
         }
     }
 
