@@ -147,15 +147,15 @@ task testWithSqlDatabase(type: Test) {
 }
 
 task testWithJpaDatabase(type: Test) {
-    systemProperty 'spring.progiles.active', 'jpa'
+    systemProperty 'spring.profiles.active', 'jpa'
 }
 
 task testWithJpaFlywayDatabase(type: Test) {
-    systemProperty 'spring.progiles.active', 'jpa-flyway'
+    systemProperty 'spring.profiles.active', 'jpa-flyway'
 }
 
 task testWithMongoDatabase(type: Test) {
-    systemProperty 'spring.progiles.active', 'mongo'
+    systemProperty 'spring.profiles.active', 'mongo'
 }
 
 tasks.withType(JavaCompile) {
