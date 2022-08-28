@@ -8,50 +8,49 @@ import java.util.stream.StreamSupport;
 import lombok.AllArgsConstructor;
 import org.bson.Document;
 import pl.futurecollars.invoicing.db.Database;
-import pl.futurecollars.invoicing.model.Invoice;
-import pl.futurecollars.invoicing.service.MongoIdService;
+import pl.futurecollars.invoicing.model.IdInterface;
 
 @AllArgsConstructor
-public class MongoBasedDatabase implements Database {
+public class MongoBasedDatabase<T extends IdInterface> implements Database<T> {
 
-    private MongoCollection<Invoice> invoices;
+    private MongoCollection<T> types;
     private MongoIdService idService;
 
     @Override
-    public long save(Invoice invoice) {
+    public long save(T type) {
 
-        invoice.setId(idService.getNextIdAndIncrement());
-        invoices.insertOne(invoice);
+        type.setId(idService.getNextIdAndIncrement());
+        types.insertOne(type);
 
-        return invoice.getId();
+        return type.getId();
     }
 
     @Override
-    public Optional<Invoice> getById(long id) {
+    public Optional<T> getById(long id) {
         return Optional.ofNullable(
-          invoices.find(idFilter(id)).first()
+          types.find(idFilter(id)).first()
         );
     }
 
     @Override
-    public List<Invoice> getAll() {
+    public List<T> getAll() {
         return StreamSupport
-          .stream(invoices.find().spliterator(), false)
+          .stream(types.find().spliterator(), false)
           .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Invoice> update(long id, Invoice updatedInvoice) {
-        updatedInvoice.setId(id);
+    public Optional<T> update(long id, T updatedType) {
+        updatedType.setId(id);
         return Optional.ofNullable(
-          invoices.findOneAndReplace(idFilter(id), updatedInvoice)
+          types.findOneAndReplace(idFilter(id), updatedType)
         );
     }
 
     @Override
-    public Optional<Invoice> delete(long id) {
+    public Optional<T> delete(long id) {
         return Optional.ofNullable(
-          invoices.findOneAndDelete(idFilter(id))
+          types.findOneAndDelete(idFilter(id))
         );
     }
 

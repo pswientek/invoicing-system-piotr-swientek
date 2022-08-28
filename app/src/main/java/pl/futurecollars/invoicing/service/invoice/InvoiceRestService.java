@@ -1,4 +1,4 @@
-package pl.futurecollars.invoicing.service;
+package pl.futurecollars.invoicing.service.invoice;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,12 +8,12 @@ import pl.futurecollars.invoicing.db.Database;
 import pl.futurecollars.invoicing.model.Invoice;
 
 @Service
-public class RestService {
+public class InvoiceRestService {
 
-    private Database database;
+    private Database<Invoice> database;
 
     @Autowired
-    public void setDatabase(Database database) {
+    public void setDatabase(Database<Invoice> database) {
         this.database = database;
     }
 

@@ -6,38 +6,39 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import pl.futurecollars.invoicing.db.Database;
-import pl.futurecollars.invoicing.model.Invoice;
+import pl.futurecollars.invoicing.model.IdInterface;
 import pl.futurecollars.invoicing.service.FileService;
 import pl.futurecollars.invoicing.service.IdService;
 import pl.futurecollars.invoicing.service.JsonService;
 
 @AllArgsConstructor
-public class FileBasedDatabase implements Database {
+public class FileBasedDatabase<T extends IdInterface> implements Database<T> {
 
     private IdService idService;
     private FileService fileService;
     private FileService idFileService;
     private JsonService jsonService;
+    private final Class<T> clazz;
 
     @Override
-    public long save(Invoice invoice) {
+    public long save(T type) {
         try {
-            invoice.setId(idService.getNextIdAndIncrement(idFileService));
-            fileService.appendLineToFile(jsonService.objectAsJson(invoice));
+            type.setId(idService.getNextIdAndIncrement(idFileService));
+            fileService.appendLineToFile(jsonService.objectAsJson(type));
 
-            return invoice.getId();
+            return type.getId();
         } catch (IOException e) {
             throw new RuntimeException("Database error: failed to save invoice", e);
         }
     }
 
     @Override
-    public Optional<Invoice> getById(long id) {
+    public Optional<T> getById(long id) {
         try {
             return fileService.readAllLines()
                     .stream()
                     .filter(line -> containsId(line, id))
-                    .map(line -> jsonService.returnJsonAsInvoice(line, Invoice.class))
+                    .map(line -> jsonService.returnJsonAsObject(line, clazz))
                     .findFirst();
         } catch (IOException e) {
             throw new RuntimeException("Database error: failed to get invoice with id: " + id, e);
@@ -45,11 +46,11 @@ public class FileBasedDatabase implements Database {
     }
 
     @Override
-    public List<Invoice> getAll() {
+    public List<T> getAll() {
         try {
             return fileService.readAllLines()
                     .stream()
-                    .map(line -> jsonService.returnJsonAsInvoice(line, Invoice.class))
+                    .map(line -> jsonService.returnJsonAsObject(line, clazz))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException("Database error: failed to read invoices from file", e);
@@ -57,47 +58,47 @@ public class FileBasedDatabase implements Database {
     }
 
     @Override
-    public Optional<Invoice> update(long id, Invoice updatedInvoice) {
+    public Optional<T> update(long id, T updatedType) {
         try {
-            List<String> allInvoices = fileService.readAllLines();
-            var listWithoutInvoiceWithGivenId = allInvoices
+            List<String> allTypes = fileService.readAllLines();
+            var listWithoutTypeWithGivenId = allTypes
                     .stream()
                     .filter(line -> !containsId(line, id))
                     .collect(Collectors.toList());
 
-            updatedInvoice.setId(id);
-            listWithoutInvoiceWithGivenId.add(jsonService.objectAsJson(updatedInvoice));
+            updatedType.setId(id);
+            listWithoutTypeWithGivenId.add(jsonService.objectAsJson(updatedType));
 
-            fileService.updateFile(listWithoutInvoiceWithGivenId);
+            fileService.updateFile(listWithoutTypeWithGivenId);
 
-            allInvoices.removeAll(listWithoutInvoiceWithGivenId);
-            if (allInvoices.isEmpty()) {
+            allTypes.removeAll(listWithoutTypeWithGivenId);
+            if (allTypes.isEmpty()) {
                 return Optional.empty();
             }
-            return Optional.of(jsonService.returnJsonAsInvoice(allInvoices.get(0), Invoice.class));
+            return Optional.of(jsonService.returnJsonAsObject(allTypes.get(0), clazz));
         } catch (IOException e) {
             throw new RuntimeException("Database error: failed to update invoice with id: " + id, e);
         }
     }
 
     @Override
-    public Optional<Invoice> delete(long id) {
+    public Optional<T> delete(long id) {
         try {
-            var allInvoices = fileService.readAllLines();
+            var allTypes = fileService.readAllLines();
 
-            var updatedList = allInvoices
+            var updatedList = allTypes
                     .stream()
                     .filter(line -> !containsId(line, id))
                     .collect(Collectors.toList());
 
             fileService.updateFile(updatedList);
 
-            allInvoices.removeAll(updatedList);
+            allTypes.removeAll(updatedList);
 
-            if (allInvoices.isEmpty()) {
+            if (allTypes.isEmpty()) {
                 return Optional.empty();
             }
-            return Optional.of(jsonService.returnJsonAsInvoice(allInvoices.get(0), Invoice.class));
+            return Optional.of(jsonService.returnJsonAsObject(allTypes.get(0), clazz));
 
         } catch (IOException e) {
             throw new RuntimeException("Database error: failed to delete invoice with id: " + id, e);
@@ -105,6 +106,6 @@ public class FileBasedDatabase implements Database {
     }
 
     private boolean containsId(String line, long id) {
-        return line.contains("\"id\":" + id + ",\"number\"");
+        return line.contains("\"id\":" + id + ",");
     }
 }

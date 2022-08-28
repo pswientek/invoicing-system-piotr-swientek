@@ -1,5 +1,6 @@
 package pl.futurecollars.invoicing
 
+import pl.futurecollars.invoicing.model.Car
 import pl.futurecollars.invoicing.model.Company
 import pl.futurecollars.invoicing.model.Invoice
 import pl.futurecollars.invoicing.model.InvoiceEntry
@@ -26,6 +27,12 @@ class TestHelpers {
                     .price((BigDecimal.valueOf(id * 2000)).setScale(2))
                     .vatValue((BigDecimal.valueOf(id * 2000 * 0.08)).setScale(2))
                     .vatRate(Vat.VAT_8)
+                    .carExpenses(id % 2 == 0 ? null :
+                            Car.builder()
+                                    .registrationPlate("XYZ")
+                                    .personalUsage(false)
+                                    .build()
+                    )
                     .build()
     }
 
@@ -38,4 +45,19 @@ class TestHelpers {
                 .entries((1..id).collect({ product(it) }))
                 .build()
     }
+
+    static Invoice resetIds(Invoice invoice) {
+        invoice.getBuyer().id = 0
+        invoice.getSeller().id = 0
+        invoice.entries.forEach {
+            it.id = 0
+            it.carExpenses?.id = 0
+        }
+        invoice
+    }
+
+    static List<Invoice> resetIds(List<Invoice> invoices) {
+        invoices.forEach { invoice -> resetIds(invoice) }
+    }
+
 }

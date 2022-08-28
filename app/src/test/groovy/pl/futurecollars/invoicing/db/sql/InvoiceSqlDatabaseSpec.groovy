@@ -6,11 +6,10 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import pl.futurecollars.invoicing.db.AbstractDatabaseSpec
 import pl.futurecollars.invoicing.db.Database
-import pl.futurecollars.invoicing.db.sql.SqlDatabase
 
 import javax.sql.DataSource
 
-class SqlDatabaseSpec extends AbstractDatabaseSpec {
+class InvoiceSqlDatabaseSpec extends AbstractDatabaseSpec {
 
     @Override
     Database getDatabaseInstance()  {
@@ -25,7 +24,7 @@ class SqlDatabaseSpec extends AbstractDatabaseSpec {
         flyway.clean()
         flyway.migrate()
 
-        new SqlDatabase(jdbcTemplate)
+        new InvoiceSqlDatabase(jdbcTemplate)
     }
 }
 

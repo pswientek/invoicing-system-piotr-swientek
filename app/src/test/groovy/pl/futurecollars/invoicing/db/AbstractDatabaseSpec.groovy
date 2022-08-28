@@ -1,21 +1,24 @@
 package pl.futurecollars.invoicing.db
 
-import pl.futurecollars.invoicing.db.Database
 import pl.futurecollars.invoicing.model.Invoice
 import spock.lang.Specification
 import static pl.futurecollars.invoicing.TestHelpers.invoice
+import static pl.futurecollars.invoicing.TestHelpers.resetIds
 
 abstract class AbstractDatabaseSpec extends Specification {
 
     List<Invoice> invoices = (1..12).collect { invoice(it) }
 
-    abstract Database getDatabaseInstance()
+    abstract Database<Invoice> getDatabaseInstance()
 
-    Database database
+    Database<Invoice> database
 
     def setup() {
         database = getDatabaseInstance()
-        database.reset()
+        database.getAll().forEach {
+            invoice -> database.delete(invoice.getId())
+        }
+        assert database.getAll().isEmpty()
     }
 
     def "should save invoices returning sequential id"() {
@@ -64,16 +67,24 @@ abstract class AbstractDatabaseSpec extends Specification {
 
         expect:
         database.getAll().size() == invoices.size()
-        database.getAll().forEach { assert resetIds(it) == invoices.get(it.getId() - 1 as int) }
+        database.getAll().eachWithIndex { invoice, index ->
+            def invoiceAsString = resetIds(invoice).toString()
+            def expectedInvoiceAsString = resetIds(invoices.get(index)).toString()
+            assert invoiceAsString == expectedInvoiceAsString
+        }
 
         when:
-        database.delete(1)
+        def firstInvoiceId = database.getAll().get(0).getId()
+        database.delete(firstInvoiceId)
 
         then:
         database.getAll().size() == invoices.size() - 1
-        database.getAll().forEach { assert resetIds(it) == invoices.get(it.getId() - 1 as int) }
-        database.getAll().forEach { assert it.getId() != 1 }
+        database.getAll().eachWithIndex { invoice, index ->
+            assert resetIds(invoice).toString() == resetIds(invoices.get(index + 1)).toString()
+        }
+        database.getAll().forEach { assert it.getId() != firstInvoiceId }
     }
+
 
     def "it's possible to update the invoice, original invoice is returned"() {
         given:
@@ -88,8 +99,14 @@ abstract class AbstractDatabaseSpec extends Specification {
 
         then:
         def invoiceAfterUpdate = database.getById(originalInvoice.id).get()
-        resetIds(invoiceAfterUpdate) == expectedInvoice
-        resetIds(result.get()) == originalInvoice
+        def invoiceAfterUpdateAsString = resetIds(invoiceAfterUpdate).toString()
+        def expectedInvoiceAfterUpdateAsString = resetIds(expectedInvoice).toString()
+        invoiceAfterUpdateAsString == expectedInvoiceAfterUpdateAsString
+
+        and:
+        def invoiceBeforeUpdateAsString = resetIds(result.get()).toString()
+        def expectedInvoiceBeforeUpdateAsString = resetIds(originalInvoice).toString()
+        invoiceBeforeUpdateAsString == expectedInvoiceBeforeUpdateAsString
     }
 
 
@@ -113,12 +130,5 @@ abstract class AbstractDatabaseSpec extends Specification {
         expect:
         database.update(213, invoices.get(1)) == Optional.empty()
     }
-
-    static Invoice resetIds(Invoice invoice) {
-        invoice.getBuyer().id = 0
-        invoice.getSeller().id = 0
-        invoice
-    }
-
 
 }

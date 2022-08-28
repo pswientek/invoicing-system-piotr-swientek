@@ -1,19 +1,21 @@
-package pl.futurecollars.invoicing.controller;
+package pl.futurecollars.invoicing.controller.invoice;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pl.futurecollars.invoicing.model.Invoice;
-import pl.futurecollars.invoicing.service.RestService;
+import pl.futurecollars.invoicing.service.invoice.InvoiceRestService;
 
 @RestController
 @AllArgsConstructor
 public class InvoiceController implements InvoiceApi {
 
-    private final RestService restService;
+    @Autowired
+    private final InvoiceRestService restService;
 
     @Override
     public long add(@RequestBody Invoice invoice) {

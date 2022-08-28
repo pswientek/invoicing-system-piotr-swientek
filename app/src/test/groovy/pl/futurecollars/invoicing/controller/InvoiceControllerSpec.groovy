@@ -1,16 +1,14 @@
 package pl.futurecollars.invoicing.controller
 
-import com.mongodb.client.MongoDatabase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.ApplicationContext
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import pl.futurecollars.invoicing.TestHelpers
+import pl.futurecollars.invoicing.db.Database
 import pl.futurecollars.invoicing.model.Invoice
 import pl.futurecollars.invoicing.service.JsonService
-import spock.lang.Requires
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
@@ -41,19 +39,22 @@ class InvoiceControllerSpec extends Specification {
     private JsonService jsonService
 
     @Autowired
-    private ApplicationContext context
+    private Database<Invoice> database
 
-    @Requires({ System.getProperty('spring.profiles.active', 'mongo').contains("mongo")})
     def "database is dropped to ensure clean state"() {
         expect:
-        MongoDatabase mongoDatabase = context.getBean(MongoDatabase)
-        mongoDatabase.drop()
+        database != null
+
+        when:
+        database.reset()
+
+        then:
+        database.getAll().size() == 0
     }
 
 
     def "empty array is returned when no invoices were added"() {
         when:
-        getAllInvoices().each { invoice -> deleteInvoice(invoice.id) }
         def response = mockMvc.perform(get(ENDPOINT))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -98,7 +99,7 @@ class InvoiceControllerSpec extends Specification {
                 .response
                 .contentAsString
 
-        def invoices = jsonService.returnJsonAsInvoice(response, Invoice[])
+        def invoices = jsonService.returnJsonAsObject(response, Invoice[])
 
         then:
         invoices.size() == 1
@@ -117,7 +118,7 @@ class InvoiceControllerSpec extends Specification {
                 .response
                 .contentAsString
 
-        def invoice = jsonService.returnJsonAsInvoice(response, Invoice)
+        def invoice = jsonService.returnJsonAsObject(response, Invoice)
 
         then:
         invoice == expectedInvoice
@@ -152,10 +153,10 @@ class InvoiceControllerSpec extends Specification {
                 .response
                 .contentAsString
 
-        def invoices = jsonService.returnJsonAsInvoice(response, Invoice)
+        def invoice = jsonService.returnJsonAsObject(response, Invoice)
 
         then:
-        invoices == expectedInvoice
+        invoice == expectedInvoice
     }
 
     def "invoice can be deleted"() {
@@ -172,18 +173,4 @@ class InvoiceControllerSpec extends Specification {
                 .andExpect(status().isNotFound())
     }
 
-    List<Invoice> getAllInvoices() {
-        def response = mockMvc.perform(get(ENDPOINT))
-                .andExpect(status().isOk())
-                .andReturn()
-                .response
-                .contentAsString
-
-        jsonService.returnJsonAsInvoice(response, Invoice[])
-    }
-
-    void deleteInvoice(int id) {
-        mockMvc.perform(delete("$ENDPOINT/$id"))
-                .andExpect(status().isNoContent())
-    }
 }
