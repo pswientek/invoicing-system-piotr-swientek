@@ -10,7 +10,7 @@ buildscript {
     ext{
         lombokVersion = '1.18.20'
         spockVersion = '2.1-groovy-3.0'
-        springBootVersion = '2.7.2'
+        springBootVersion = '2.7.3'
         springDependencyManagmentVersion = '1.0.12.RELEASE'
         springFoxUiVersion = '3.0.0'
         springFoxStarterVersion = '3.0.0'
@@ -72,11 +72,6 @@ dependencies {
     testImplementation "org.spockframework:spock-spring:${spockVersion}"
  }
 
-tasks.named('test') {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
-}
-
 jacocoTestCoverageVerification {
     executionData tasks.withType(Test)
     violationRules {
@@ -109,7 +104,7 @@ java {
     }
 }
 
-test {
+check {
     finalizedBy jacocoTestReport
 }
 
@@ -135,33 +130,40 @@ checkstyle {
 }
 
 task testWithFileDatabase(type: Test) {
-    systemProperty 'spring.profiles.active', 'file'
+    useJUnitPlatform() {
+        systemProperty "spring.profiles.active", "file"
+    }
 }
 
 task testWithMemoryDatabase(type: Test) {
-    systemProperty 'spring.profiles.active', 'memory'
+    useJUnitPlatform() {
+        systemProperty "spring.profiles.active", "memory"
+    }
 }
 
 task testWithSqlDatabase(type: Test) {
-    systemProperty 'spring.profiles.active', 'sql-pg'
+    useJUnitPlatform() {
+        systemProperty "spring.profiles.active", "sql"
+    }
 }
 
 task testWithJpaDatabase(type: Test) {
-    systemProperty 'spring.profiles.active', 'jpa'
+    useJUnitPlatform() {
+        systemProperty "spring.profiles.active", "jpa"
+    }
 }
 
 task testWithJpaFlywayDatabase(type: Test) {
-    systemProperty 'spring.profiles.active', 'jpa-flyway'
+    useJUnitPlatform() {
+        systemProperty "spring.profiles.active", "jpa-flyway"
+    }
 }
 
 task testWithMongoDatabase(type: Test) {
-    systemProperty 'spring.profiles.active', 'mongo'
+    useJUnitPlatform() {
+        systemProperty "spring.profiles.active", "mongo"
+    }
 }
-
-tasks.withType(JavaCompile) {
-    options.compilerArgs << "-Xlint:all" << "-Xlint:-processing" << "-Werror"
-}
-
 
 check.dependsOn testWithFileDatabase
 check.dependsOn testWithMemoryDatabase
@@ -170,11 +172,6 @@ check.dependsOn testWithJpaDatabase
 check.dependsOn testWithJpaFlywayDatabase
 check.dependsOn testWithMongoDatabase
 
-String osName = System.getProperty("os.name").toLowerCase()
-if (osName.contains("mac")) {
-    task testWithPostgreSqlDatabase(type: Test) {
-        systemProperty 'spring.profiles.active', 'sql-pg'
-    }
-
-    check.dependsOn testWithPostgreSqlDatabase
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:all" << "-Xlint:-processing" << "-Werror"
 }

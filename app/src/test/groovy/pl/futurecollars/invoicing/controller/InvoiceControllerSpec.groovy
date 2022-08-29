@@ -17,6 +17,7 @@ import java.time.LocalDate
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import static pl.futurecollars.invoicing.TestHelpers.resetIds
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -103,7 +104,7 @@ class InvoiceControllerSpec extends Specification {
 
         then:
         invoices.size() == 1
-        invoices[0] == expectedInvoice
+        resetIds(invoices[0]) == resetIds(expectedInvoice)
     }
 
     def "invoice is returned correctly when getting by id"() {
@@ -121,7 +122,25 @@ class InvoiceControllerSpec extends Specification {
         def invoice = jsonService.returnJsonAsObject(response, Invoice)
 
         then:
-        invoice == expectedInvoice
+        resetIds(invoice) == resetIds(expectedInvoice)
+    }
+
+    def "updated invoice is returned correctly when getting by id"() {
+        given:
+        def expectedInvoice = originalInvoice
+        expectedInvoice.id = invoiceId
+
+        when:
+        def response = mockMvc.perform(get("$ENDPOINT/$invoiceId"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .response
+                .contentAsString
+
+        def invoice = jsonService.returnJsonAsObject(response, Invoice)
+
+        then:
+        resetIds(invoice) == resetIds(expectedInvoice)
     }
 
     def "invoice date can be modified"() {
@@ -138,25 +157,6 @@ class InvoiceControllerSpec extends Specification {
                         .contentType(MediaType.APPLICATION_JSON)
         )
                 .andExpect(status().isNoContent())
-    }
-
-    def "updated invoice is returned correctly when getting by id"() {
-        given:
-        def expectedInvoice = originalInvoice
-        expectedInvoice.id = invoiceId
-        expectedInvoice.date = updatedDate
-
-        when:
-        def response = mockMvc.perform(get("$ENDPOINT/$invoiceId"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .response
-                .contentAsString
-
-        def invoice = jsonService.returnJsonAsObject(response, Invoice)
-
-        then:
-        invoice == expectedInvoice
     }
 
     def "invoice can be deleted"() {
