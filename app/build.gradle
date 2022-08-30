@@ -153,12 +153,6 @@ task testWithJpaDatabase(type: Test) {
     }
 }
 
-task testWithJpaFlywayDatabase(type: Test) {
-    useJUnitPlatform() {
-        systemProperty "spring.profiles.active", "jpa-flyway"
-    }
-}
-
 task testWithMongoDatabase(type: Test) {
     useJUnitPlatform() {
         systemProperty "spring.profiles.active", "mongo"
@@ -169,7 +163,6 @@ check.dependsOn testWithFileDatabase
 check.dependsOn testWithMemoryDatabase
 check.dependsOn testWithSqlDatabase
 check.dependsOn testWithJpaDatabase
-check.dependsOn testWithJpaFlywayDatabase
 check.dependsOn testWithMongoDatabase
 
 tasks.withType(JavaCompile) {

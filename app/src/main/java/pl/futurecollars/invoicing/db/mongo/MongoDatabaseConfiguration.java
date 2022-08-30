@@ -59,7 +59,7 @@ public class MongoDatabaseConfiguration {
 
     @Bean
     public Database<Company> companyMongoDatabase(
-        @Value("${invoicing-system.database.company.collection}") String collectionName,
+        @Value("${invoicing-system.database.companies.collection}") String collectionName,
         MongoDatabase mongoDb,
         MongoIdService mongoIdService
     ) {
