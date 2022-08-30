@@ -2,6 +2,7 @@ package pl.futurecollars.invoicing.service
 
 import org.springframework.beans.factory.annotation.Autowired
 import pl.futurecollars.invoicing.db.Database
+import pl.futurecollars.invoicing.service.invoice.InvoiceService
 import spock.lang.Specification
 
 import static pl.futurecollars.invoicing.TestHelpers.invoice
@@ -52,6 +53,7 @@ class InvoiceServiceUnitSpec extends Specification {
     def "calling update() should delegate to database update() method"() {
         given:
         def invoice = invoice(1)
+        invoice.id = 1
         when:
         service.update(invoice.getId(), invoice)
         then:
