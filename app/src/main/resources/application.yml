@@ -13,6 +13,9 @@ logging:
 
 spring:
   profiles:
-    active: memory
+    active: sql
   flyway:
     enabled: false
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher

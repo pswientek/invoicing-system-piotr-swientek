@@ -1,37 +1,18 @@
 package pl.futurecollars.invoicing.controller
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
 import pl.futurecollars.invoicing.model.Car
 import pl.futurecollars.invoicing.model.Company
 import pl.futurecollars.invoicing.model.Invoice
 import pl.futurecollars.invoicing.model.InvoiceEntry
-import pl.futurecollars.invoicing.service.JsonService
-import pl.futurecollars.invoicing.service.TaxCalculatorResult
-import spock.lang.Specification
+import pl.futurecollars.invoicing.model.Vat
 import spock.lang.Unroll
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.time.LocalDate
+
 import static pl.futurecollars.invoicing.TestHelpers.company
-import static pl.futurecollars.invoicing.TestHelpers.invoice
 
-@AutoConfigureMockMvc
-@SpringBootTest
 @Unroll
-class TaxCalculatorControllerSpec extends Specification{
-
-    static final String INVOICE_ENDPOINT = "/invoices"
-    static final String TAX_CALCULATOR_ENDPOINT = "/tax"
-
-    @Autowired
-    MockMvc mockMvc
-
-    @Autowired
-    JsonService jsonService
+class TaxCalculatorControllerSpec extends AbstractControllerSpec {
 
     def setup() {
         getAllInvoices().each { invoice -> deleteInvoice(invoice.id) }
@@ -123,15 +104,20 @@ class TaxCalculatorControllerSpec extends Specification{
     def "tax is calculated correctly when car is not used for personal purposes"() {
         given:
         def invoice = Invoice.builder()
+                .date(LocalDate.now())
+                .number("9999")
                 .seller(company(1))
                 .buyer(company(2))
                 .entries(List.of(
                         InvoiceEntry.builder()
                                 .vatValue(BigDecimal.valueOf(23.45))
+                                .vatRate(Vat.VAT_8)
                                 .price(BigDecimal.valueOf(100))
+                                .quantity(1.0)
                                 .carExpenses(
                                         Car.builder()
                                                 .personalUsage(A)
+                                                .registrationPlate("SGL 99999")
                                                 .build()
                                 )
                                 .build()
@@ -175,26 +161,38 @@ class TaxCalculatorControllerSpec extends Specification{
         given:
         def ourCompany = Company.builder()
                 .taxIdentificationNumber("1234")
+                .address("no address exception ;)")
+                .name("i don't care about name")
                 .pensionInsurance(514.57)
                 .healthInsurance(319.94)
                 .build()
 
         def invoiceWithIncome = Invoice.builder()
+                .date(LocalDate.now())
+                .number("number is required")
                 .seller(ourCompany)
                 .buyer(company(2))
                 .entries(List.of(
                         InvoiceEntry.builder()
                                 .price(76011.62)
+                                .vatValue(0.0)
+                                .quantity(1.0)
+                                .vatRate(Vat.VAT_0)
                                 .build()
                 ))
                 .build()
 
         def invoiceWithCosts = Invoice.builder()
+                .date(LocalDate.now())
+                .number("number is required")
                 .seller(company(4))
                 .buyer(ourCompany)
                 .entries(List.of(
                         InvoiceEntry.builder()
                                 .price(11329.47)
+                                .vatValue(0.0)
+                                .quantity(1.0)
+                                .vatRate(Vat.VAT_0)
                                 .build()
                 ))
                 .build()
@@ -224,56 +222,4 @@ class TaxCalculatorControllerSpec extends Specification{
             vatToReturn == 0
         }
     }
-
-    TaxCalculatorResult calculateTax(Company company) {
-        def response = mockMvc.perform(
-                post("$TAX_CALCULATOR_ENDPOINT")
-                        .content(jsonService.objectAsJson(company))
-                        .contentType(MediaType.APPLICATION_JSON)
-        )
-                .andExpect(status().isOk())
-                .andReturn()
-                .response
-                .contentAsString
-
-        jsonService.returnJsonAsInvoice(response, TaxCalculatorResult)
-    }
-
-    List<Invoice> addUniqueInvoices(int count) {
-        (1..count).collect { id ->
-            def invoice = invoice(id)
-            invoice.id = addInvoiceAndReturnId(invoice)
-            return invoice
-        }
-    }
-
-    int addInvoiceAndReturnId(Invoice invoice) {
-        Integer.valueOf(
-                mockMvc.perform(
-                        post(INVOICE_ENDPOINT)
-                                .content(jsonService.objectAsJson(invoice))
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                        .andExpect(status().isOk())
-                        .andReturn()
-                        .response
-                        .contentAsString
-        )
-    }
-
-    List<Invoice> getAllInvoices() {
-        def response = mockMvc.perform(get(INVOICE_ENDPOINT))
-                .andExpect(status().isOk())
-                .andReturn()
-                .response
-                .contentAsString
-
-        jsonService.returnJsonAsInvoice(response, Invoice[])
-    }
-
-    void deleteInvoice(int id) {
-        mockMvc.perform(delete("$INVOICE_ENDPOINT/$id"))
-                .andExpect(status().isNoContent())
-    }
-
 }
