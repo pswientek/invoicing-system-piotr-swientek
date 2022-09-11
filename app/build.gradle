@@ -59,6 +59,8 @@ dependencies {
     implementation "io.springfox:springfox-swagger-ui:${springFoxUiVersion}"
     implementation "org.flywaydb:flyway-core:${flywayVersion}"
     implementation "org.mongodb:mongo-java-driver:${mongoVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation "org.springframework.security:spring-security-test"
 
     runtimeOnly "com.h2database:h2:${h2Version}"
     runtimeOnly "org.postgresql:postgresql:${postgresVersion}"
@@ -92,7 +94,8 @@ jacocoTestCoverageVerification {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: ['pl/futurecollars/invoicing/InvoicingSystemApplication.class',
-                                        'pl/futurecollars/invoicing/config/DatabaseConfiguration.class'])
+                                        'pl/futurecollars/invoicing/config/DatabaseConfiguration.class',
+                                        'pl/futurecollars/invoicing/config/*'])
         }))
     }
 }
