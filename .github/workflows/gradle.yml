@@ -7,7 +7,20 @@ on:
 jobs:
   build-app:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.8.0
+        with:
+            mongodb-version: 6.0
       - name: Build with Gradle
         run: ./gradlew build
+
+      - name: Archive reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+            name: reports
+            path: build/reports/**

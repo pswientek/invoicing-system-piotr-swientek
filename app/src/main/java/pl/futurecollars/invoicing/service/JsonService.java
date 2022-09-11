@@ -28,7 +28,7 @@ public class JsonService {
         }
     }
 
-    public <T> T returnJsonAsInvoice(String json, Class<T> invoice) {
+    public <T> T returnJsonAsObject(String json, Class<T> invoice) {
         try {
             return objectMapper.readValue(json, invoice);
         } catch (JsonProcessingException e) {

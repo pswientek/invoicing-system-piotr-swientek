@@ -1,31 +1,23 @@
 package pl.futurecollars.invoicing.db;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import pl.futurecollars.invoicing.model.Invoice;
-import pl.futurecollars.invoicing.model.InvoiceEntry;
+import pl.futurecollars.invoicing.model.IdInterface;
 
-public interface Database {
+public interface Database<T extends IdInterface> {
 
-    int save(Invoice invoice);
+    long save(T type);
 
-    Optional<Invoice> getById(int id);
+    Optional<T> getById(long id);
 
-    List<Invoice> getAll();
+    List<T> getAll();
 
-    Optional<Invoice> update(int id, Invoice updatedInvoice);
+    Optional<T> update(long id, T updatedType);
 
-    Optional<Invoice> delete(int id);
+    Optional<T> delete(long id);
 
-    default BigDecimal visit(Predicate<Invoice> invoicePredicate, Function<InvoiceEntry, BigDecimal> invoiceEntryToValue) {
-        return getAll().stream()
-                .filter(invoicePredicate)
-                .flatMap(i -> i.getEntries().stream())
-                .map(invoiceEntryToValue)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    default void reset() {
+        getAll().forEach(item -> delete(item.getId()));
     }
 
 }

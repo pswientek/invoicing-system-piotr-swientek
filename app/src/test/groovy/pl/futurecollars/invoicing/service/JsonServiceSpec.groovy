@@ -15,7 +15,7 @@ class JsonServiceSpec extends Specification {
         def invoiceAsString = jsonService.objectAsJson(invoice)
         System.out.println(invoiceAsString)
         and:
-        def invoiceFromJson = jsonService.returnJsonAsInvoice(invoiceAsString, Invoice.class)
+        def invoiceFromJson = jsonService.returnJsonAsObject(invoiceAsString, Invoice.class)
 
         then:
         invoice == invoiceFromJson

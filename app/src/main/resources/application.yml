@@ -13,6 +13,18 @@ logging:
 
 spring:
   profiles:
-    active: memory
+    active: file
   flyway:
     enabled: false
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  security:
+    user:
+      name: piotr
+      password: abc123
+
+invoicing-system:
+  allowedOrigins: http://localhost:4200
+  csrf:
+    disable: true
