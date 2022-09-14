@@ -28,3 +28,4 @@ invoicing-system:
   allowedOrigins: http://localhost:4200
   csrf:
     disable: true
+jwt.secret: piotr
