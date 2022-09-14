@@ -18,11 +18,12 @@ public class SpringFoxConfig {
     public Docket docket() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.any())
+                .apis(RequestHandlerSelectors.basePackage("pl.futurecollars"))
                 .paths(PathSelectors.any())
                 .build()
                 .tags(
                         new Tag("invoice-controller", "Controller used to list / add / update / delete invoices."),
+                        new Tag("company-controller", "Controller used to list / add / update / delete companies."),
                         new Tag("tax-controller", "Controller that is calculating taxes")
                 )
                 .apiInfo(apiInfo());

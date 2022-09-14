@@ -3,6 +3,7 @@ package pl.futurecollars.invoicing.service
 import pl.futurecollars.invoicing.db.Database
 import pl.futurecollars.invoicing.db.memory.InMemoryDatabase
 import pl.futurecollars.invoicing.model.Invoice
+import pl.futurecollars.invoicing.service.invoice.InvoiceService
 import spock.lang.Specification
 
 import static pl.futurecollars.invoicing.TestHelpers.invoice
@@ -24,10 +25,10 @@ class InvoiceServiceIntegrationSpec extends Specification {
         def ids = invoices.collect({ service.save(it) })
 
         then:
-        ids == (1..invoices.size()).collect()
+        ids == (1L..invoices.size()).collect()
         ids.forEach({ assert service.getById(it).isPresent() })
         ids.forEach({ assert service.getById(it).get().getId() == it })
-        ids.forEach({ assert service.getById(it).get() == invoices.get(it - 1) })
+        ids.forEach({ assert service.getById(it).get() == invoices.get(it - 1 as int) })
     }
 
     def "get by id returns empty optional when there is no invoice with given id"() {
@@ -46,14 +47,14 @@ class InvoiceServiceIntegrationSpec extends Specification {
 
         expect:
         service.getAll().size() == invoices.size()
-        service.getAll().forEach({ assert it == invoices.get(it.getId() - 1) })
+        service.getAll().forEach({ assert it == invoices.get(it.getId() - 1 as int) })
 
         when:
         service.delete(1)
 
         then:
         service.getAll().size() == invoices.size() - 1
-        service.getAll().forEach({ assert it == invoices.get(it.getId() - 1) })
+        service.getAll().forEach({ assert it == invoices.get(it.getId() - 1 as int) })
         service.getAll().forEach({ assert it.getId() != 1 })
     }
 
@@ -76,7 +77,7 @@ class InvoiceServiceIntegrationSpec extends Specification {
     def "it's possible to update the invoice, previous invoice is returned"() {
         given:
         def originalInvoice = invoices.get(0)
-        int id = service.save(originalInvoice)
+        long id = service.save(originalInvoice)
 
         when:
         def result = service.update(id, invoices.get(1))
